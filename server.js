@@ -12,8 +12,13 @@ app.use(bodyParser.json());
  * 
  * Return the list of tasks with status code 200.
  */
-app.get('/tasks', (req, res) => {
-//   TODO: Implement the logic to return the list of tasks
+app.get('/tasks', async (req, res) => {
+    try {
+        res.status(200).json(tasksContainer.tasks);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao buscar tarefas' });
+    }
 });
 
 /**
@@ -27,8 +32,17 @@ app.get('/tasks', (req, res) => {
  * If not found return status code 404.
  * If id is not valid number return status code 400.
  */
-app.get('/task/:id', (req, res) => {
-//   TODO: Implement the logic to return the task for the given id
+app.get('/task/:id', async (req, res) => {
+    try {
+        const id = Number(req.params.id);
+        const task = tasksContainer.tasks.find(task => task.id === id);
+        if (!task) return res.status(404).json({ error: 'Task não encontrada' });
+        else if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+        else return res.status(200).json(task);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao buscar tarefa' });
+    }
 });
 
 /**
@@ -43,8 +57,20 @@ app.get('/task/:id', (req, res) => {
  * If the task is not found, return a status code 404.
  * If the provided id is not a valid number return a status code 400.
  */
-app.put('/task/update', (req, res) => {
-//   TODO: Implement the logic to update the task with the given id
+app.put('/task/update', async (req, res) => {
+    try {
+        const { id, ...updates } = req.body;
+        const task = tasksContainer.tasks.find(task => task.id === id);
+
+        if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+        else if (!task) return res.status(404).json({ error: 'Task não encontrada' });
+
+        Object.assign(task, updates);
+        return res.sendStatus(204);
+    } catch (error) {
+        console.error(error);
+        res.status(404).json({ error: 'Erro ao editar tarefa' });
+    }
 });
 
 /**
@@ -56,8 +82,21 @@ app.put('/task/update', (req, res) => {
  * Add a new task to the array tasksContainer.tasks with the given title and description.
  * Return status code 201.
  */
-app.post('/task/create', (req, res) => {
-//   TODO: Implement the logic to create a new task
+app.post('/task/create', async (req, res) => {
+    try {
+        const tasks = tasksContainer.tasks;
+        const newTask = {
+            id: tasks[tasks.length - 1]?.id + 1 || 1,
+            title: req.body.title,
+            done: false,
+        };
+
+        tasksContainer.tasks.push(newTask);
+        res.status(201).json(newTask);
+    } catch (error) {
+        console.error(error);
+        res.status(404).json({ error: 'Erro ao criar nova tarefa' });
+    }
 });
 
 /**
@@ -70,8 +109,20 @@ app.post('/task/create', (req, res) => {
  * If the task is not found, return a status code 404.
  * If the provided id is not a valid number return a status code 400.
  */
-app.delete('/task/delete', (req, res) => {
-//   TODO: Implement the logic to delete the task with the given id
+app.delete('/task/delete/:id',  async (req, res) => {
+    try {
+        const id = Number(req.params.id);
+        const task = tasksContainer.tasks.find(task => task.id === id);
+
+        if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+        else if (!task) return res.status(404).json({ error: 'Task não encontrada' });
+
+        tasksContainer.tasks = tasksContainer.tasks.filter(task => task.id !== id);
+        res.sendStatus(204);
+    } catch (error) {
+        console.error(error);
+        res.status(404).json({ error: 'Erro ao deletar tarefa' });
+    }
 });
 
 app.listen(9001, () => {

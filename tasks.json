@@ -1,3 +1,7 @@
 {
-  "tasks": []
+  "tasks": [
+    { "id": 1, "title": "Realizar teste DJP", "done": false },
+    { "id": 2, "title": "Assistir novo episódio masterchef", "done": true },
+    { "id": 3, "title": "Alimentar gatos", "done": false }
+  ]
 }
